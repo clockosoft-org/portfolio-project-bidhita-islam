@@ -21,12 +21,27 @@ const navItems = [
   { name: "Contact", href: "/contact", scrollTo: "contact" },
 ]
 
+// Maps each nav item's `scrollTo` id to the Supabase table that backs it.
+// Used to hide menu entries whose section has no data.
+const sectionTables: Record<string, string> = {
+  experiences: "experiences",
+  "scholarly-activities": "scholarly_activities",
+  publications: "publications",
+  awards: "awards",
+  "media-coverage": "media_coverage",
+  skills: "skills",
+  volunteering: "volunteering",
+}
+
 export function Navbar({ hiddenSections = [], profileName }: { hiddenSections?: string[]; profileName?: string }) {
   const pathname = usePathname()
   const router = useRouter()
   const [isScrolled, setIsScrolled] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
-  const [portfolioName, setPortfolioName] = useState(profileName || "Lamia Tasnim")
+  const [portfolioName, setPortfolioName] = useState(profileName || "Bidhita Islam")
+  // Start from any server-provided hidden sections (home page) so there's no flash,
+  // then refine client-side so subpages hide empty sections too.
+  const [hidden, setHidden] = useState<string[]>(hiddenSections)
 
   useEffect(() => {
     const handleScroll = () => {
@@ -52,6 +67,31 @@ export function Navbar({ hiddenSections = [], profileName }: { hiddenSections?: 
       })
       .catch(() => {
         // Keep fallback name if profile fetch fails
+      })
+
+    return () => {
+      isMounted = false
+    }
+  }, [])
+
+  // Determine which sections are empty (no rows) and should be hidden from the menu.
+  // Runs on every page so subpages stay consistent with the home page.
+  useEffect(() => {
+    let isMounted = true
+    const supabase = createClient()
+
+    Promise.all(
+      Object.entries(sectionTables).map(async ([scrollTo, table]) => {
+        const { count } = await supabase.from(table).select("id", { count: "exact", head: true })
+        return { scrollTo, empty: (count ?? 0) === 0 }
+      }),
+    )
+      .then((results) => {
+        if (!isMounted) return
+        setHidden(results.filter((r) => r.empty).map((r) => r.scrollTo))
+      })
+      .catch(() => {
+        // Keep server-provided / initial hidden list if the count query fails
       })
 
     return () => {
@@ -145,7 +185,7 @@ export function Navbar({ hiddenSections = [], profileName }: { hiddenSections?: 
 
           {/* Desktop Navigation */}
           <div className="hidden lg:flex items-center gap-1 flex-shrink-0">
-            {navItems.filter(item => !hiddenSections.includes(item.scrollTo)).map((item) => {
+            {navItems.filter(item => !hidden.includes(item.scrollTo)).map((item) => {
               const isActive = pathname === item.href
               return (
                 <Link
@@ -199,7 +239,7 @@ export function Navbar({ hiddenSections = [], profileName }: { hiddenSections?: 
         }`}
       >
         <div className="flex flex-col p-4 space-y-1 overflow-y-auto h-full">
-          {navItems.filter(item => !hiddenSections.includes(item.scrollTo)).map((item) => {
+          {navItems.filter(item => !hidden.includes(item.scrollTo)).map((item) => {
             const isActive = pathname === item.href
             return (
               <Link

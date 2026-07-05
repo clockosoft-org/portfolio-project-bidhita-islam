@@ -1,5 +1,6 @@
 import Link from "next/link"
 import { Facebook, Linkedin, Mail, MapPin, Phone, Github } from "lucide-react"
+import { GoogleScholarIcon, OrcidIcon, XIcon } from "@/components/social-icons"
 import { createClient } from "@/lib/supabase/server"
 
 const navLinks = [
@@ -26,6 +27,9 @@ export async function Footer() {
   const linkedinUrl = profile?.linkedin_url || "https://linkedin.com"
   const facebookUrl = profile?.facebook_url || "https://facebook.com"
   const githubUrl = profile?.github_url
+  const googleScholarUrl = profile?.google_scholar_url
+  const orcidUrl = profile?.orcid_url
+  const xUrl = profile?.x_url
 
   return (
     <footer className="bg-primary text-white">
@@ -98,6 +102,39 @@ export async function Footer() {
                   aria-label="GitHub"
                 >
                   <Github className="h-6 w-6" />
+                </a>
+              )}
+              {googleScholarUrl && (
+                <a
+                  href={googleScholarUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-primary-light transition-colors"
+                  aria-label="Google Scholar"
+                >
+                  <GoogleScholarIcon className="h-6 w-6" />
+                </a>
+              )}
+              {orcidUrl && (
+                <a
+                  href={orcidUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-primary-light transition-colors"
+                  aria-label="ORCID"
+                >
+                  <OrcidIcon className="h-6 w-6" />
+                </a>
+              )}
+              {xUrl && (
+                <a
+                  href={xUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-primary-light transition-colors"
+                  aria-label="X (Twitter)"
+                >
+                  <XIcon className="h-6 w-6" />
                 </a>
               )}
             </div>

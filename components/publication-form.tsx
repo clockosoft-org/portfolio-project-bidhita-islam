@@ -266,6 +266,7 @@ export function PublicationForm({ publication }: PublicationFormProps) {
       baseData.conference_images = conferenceImages
       baseData.conference_videos = conferenceVideos
       baseData.conference_paper_pdf = conferencePdf
+      baseData.doi = (formData.get("doi") as string)?.trim() || null
       // Clear journal and url for conference publications
       baseData.journal = null
       baseData.url = null
@@ -276,6 +277,7 @@ export function PublicationForm({ publication }: PublicationFormProps) {
       baseData.status = status
       baseData.journal = formData.get("journal") as string || null
       baseData.academic_pdf = academicPdf || null
+      baseData.doi = (formData.get("doi") as string)?.trim() || null
       baseData.citation_count = formData.get("citation_count") ? parseInt(formData.get("citation_count") as string) || 0 : 0
       // Clear URL and conference fields for academic publications
       baseData.url = null
@@ -294,6 +296,7 @@ export function PublicationForm({ publication }: PublicationFormProps) {
       baseData.url = formData.get("url") as string || null
       // Clear academic PDF and conference fields
       baseData.academic_pdf = null
+      baseData.doi = null
       baseData.citation_count = null
       baseData.conference_title = null
       baseData.conference_organizer = null
@@ -317,6 +320,7 @@ export function PublicationForm({ publication }: PublicationFormProps) {
       baseData.conference_videos = null
       baseData.conference_paper_pdf = null
       baseData.academic_pdf = null
+      baseData.doi = null
       baseData.citation_count = null
     }
 
@@ -535,6 +539,19 @@ export function PublicationForm({ publication }: PublicationFormProps) {
                   )}
                   <p className="text-sm text-muted-foreground">
                     Upload the academic paper PDF file.
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="doi">DOI Reference (Optional)</Label>
+                  <Input
+                    id="doi"
+                    name="doi"
+                    defaultValue={publication?.doi}
+                    placeholder="10.1234/abcd or https://doi.org/10.1234/abcd"
+                  />
+                  <p className="text-sm text-muted-foreground">
+                    If you don&apos;t upload a PDF, provide the DOI so readers can reach the published paper.
                   </p>
                 </div>
 
@@ -779,6 +796,19 @@ export function PublicationForm({ publication }: PublicationFormProps) {
                   )}
                   <p className="text-sm text-muted-foreground">
                     Upload the conference paper PDF file.
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="doi">DOI Reference (Optional)</Label>
+                  <Input
+                    id="doi"
+                    name="doi"
+                    defaultValue={publication?.doi}
+                    placeholder="10.1234/abcd or https://doi.org/10.1234/abcd"
+                  />
+                  <p className="text-sm text-muted-foreground">
+                    If you don&apos;t upload a PDF, provide the DOI so readers can reach the paper.
                   </p>
                 </div>
               </>

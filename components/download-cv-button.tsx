@@ -4,29 +4,21 @@ import { Download } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useToast } from "@/hooks/use-toast"
 
-export function DownloadCVButton() {
+export function DownloadCVButton({ hasCv }: { hasCv?: boolean }) {
   const { toast } = useToast()
 
-  const handleDownloadCV = async () => {
-    const preferredUrl = "/Lamia_Tasnim_CV.pdf"
-
-    try {
-      const res = await fetch(preferredUrl, { method: "HEAD" })
-      if (!res.ok) {
-        toast({
-          title: "CV not found",
-          description: `Please add the CV file to public as ${preferredUrl}.`,
-        })
-        return
-      }
-
-      window.open(preferredUrl, "_blank")
-    } catch {
+  const handleDownloadCV = () => {
+    if (!hasCv) {
       toast({
-        title: "Unable to download CV",
-        description: `Please add the CV file to public as ${preferredUrl}.`,
+        title: "CV not available",
+        description: "The CV hasn't been uploaded yet. Add it from the admin profile page.",
       })
+      return
     }
+
+    // The CV lives in a PRIVATE Supabase bucket. /api/cv mints a short-lived
+    // signed URL server-side and redirects to it.
+    window.open("/api/cv", "_blank", "noopener,noreferrer")
   }
 
   return (

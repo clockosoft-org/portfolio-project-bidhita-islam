@@ -20,6 +20,7 @@ interface ConferencePublicationCardProps {
     conference_images?: string[]
     conference_videos?: string[]
     conference_paper_pdf?: string
+    doi?: string
     publication_date?: string
     status?: string
   }
@@ -172,7 +173,7 @@ export function ConferencePublicationCard({ publication }: ConferencePublication
           </div>
         )}
 
-        {publication.conference_paper_pdf && (
+        {publication.conference_paper_pdf ? (
           <Button
             asChild
             variant="outline"
@@ -184,7 +185,23 @@ export function ConferencePublicationCard({ publication }: ConferencePublication
               Read Conference Paper <ExternalLink className="ml-2 h-4 w-4" />
             </a>
           </Button>
-        )}
+        ) : publication.doi ? (
+          <Button
+            asChild
+            variant="outline"
+            size="sm"
+            className="border-primary text-primary bg-transparent"
+          >
+            <a
+              href={publication.doi.startsWith("http") ? publication.doi : `https://doi.org/${publication.doi}`}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <ExternalLink className="mr-2 h-4 w-4" />
+              View via DOI <ExternalLink className="ml-2 h-4 w-4" />
+            </a>
+          </Button>
+        ) : null}
       </CardContent>
     </Card>
   )

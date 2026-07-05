@@ -26,6 +26,10 @@ export function ProfileForm({ profile }: ProfileFormProps) {
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
   const [imagePreview, setImagePreview] = useState(profile?.profile_image || "")
+  const [cvPath, setCvPath] = useState(profile?.cv_path || "")
+  const [cvPreviewUrl, setCvPreviewUrl] = useState("")
+  const [cvFileName, setCvFileName] = useState("")
+  const [uploadingCv, setUploadingCv] = useState(false)
   const { toast } = useToast()
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -58,6 +62,42 @@ export function ProfileForm({ profile }: ProfileFormProps) {
     }
   }
 
+  const handleCvUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    setUploadingCv(true)
+    setError(null)
+
+    const supabase = createClient()
+
+    try {
+      const fileExt = file.name.split(".").pop()
+      const filePath = `cv-${Date.now()}.${fileExt}`
+
+      const { error: uploadError } = await supabase.storage
+        .from("cv-files")
+        .upload(filePath, file, { upsert: true })
+
+      if (uploadError) throw uploadError
+
+      // Private bucket: build a temporary signed URL just for the admin preview.
+      const { data: signed } = await supabase.storage.from("cv-files").createSignedUrl(filePath, 3600)
+
+      setCvPath(filePath)
+      setCvPreviewUrl(signed?.signedUrl || "")
+      setCvFileName(file.name)
+      toast({
+        title: "CV uploaded",
+        description: "Remember to click Save Profile to publish the change.",
+      })
+    } catch (err: any) {
+      setError(err.message)
+    } finally {
+      setUploadingCv(false)
+    }
+  }
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setLoading(true)
@@ -77,9 +117,13 @@ export function ProfileForm({ profile }: ProfileFormProps) {
       phone: formData.get("phone") as string,
       address: formData.get("address") as string,
       profile_image: imagePreview,
+      cv_path: cvPath,
       linkedin_url: formData.get("linkedin_url") as string,
       facebook_url: formData.get("facebook_url") as string,
       github_url: formData.get("github_url") as string,
+      google_scholar_url: formData.get("google_scholar_url") as string,
+      orcid_url: formData.get("orcid_url") as string,
+      x_url: formData.get("x_url") as string,
       hero_badge_text: formData.get("hero_badge_text") as string,
       hero_subtitle: formData.get("hero_subtitle") as string,
       credential_1_text: formData.get("credential_1_text") as string,
@@ -151,6 +195,40 @@ export function ProfileForm({ profile }: ProfileFormProps) {
             </div>
           </div>
 
+          {/* CV / Resume */}
+          <div className="space-y-4">
+            <Label>CV / Resume (PDF or Word, max 20 MB)</Label>
+            <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+              <Input
+                type="file"
+                accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                onChange={handleCvUpload}
+                disabled={uploadingCv}
+                className="max-w-xs"
+              />
+              {uploadingCv ? (
+                <p className="text-sm text-muted-foreground flex items-center gap-2">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Uploading...
+                </p>
+              ) : cvPreviewUrl || cvPath ? (
+                <a
+                  href={cvPreviewUrl || "/api/cv"}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm text-primary hover:underline break-all"
+                >
+                  {cvFileName || "View current CV"}
+                </a>
+              ) : (
+                <p className="text-sm text-muted-foreground">No CV uploaded yet.</p>
+              )}
+            </div>
+            <p className="text-sm text-muted-foreground">
+              Uploading a new file replaces the CV served by the “Download CV” button on the homepage.
+            </p>
+          </div>
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="full_name">Full Name</Label>
@@ -218,6 +296,36 @@ export function ProfileForm({ profile }: ProfileFormProps) {
             <div className="space-y-2">
               <Label htmlFor="github_url">GitHub URL</Label>
               <Input id="github_url" name="github_url" defaultValue={profile?.github_url} />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="google_scholar_url">Google Scholar URL</Label>
+              <Input
+                id="google_scholar_url"
+                name="google_scholar_url"
+                defaultValue={profile?.google_scholar_url}
+                placeholder="https://scholar.google.com/citations?user=..."
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="orcid_url">ORCID URL</Label>
+              <Input
+                id="orcid_url"
+                name="orcid_url"
+                defaultValue={profile?.orcid_url}
+                placeholder="https://orcid.org/0000-0000-0000-0000"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="x_url">X (Twitter) URL</Label>
+              <Input
+                id="x_url"
+                name="x_url"
+                defaultValue={profile?.x_url}
+                placeholder="https://x.com/username"
+              />
             </div>
           </div>
 

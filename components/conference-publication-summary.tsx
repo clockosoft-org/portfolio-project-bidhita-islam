@@ -19,6 +19,7 @@ interface ConferencePublicationSummaryProps {
     conference_images?: string[]
     conference_videos?: string[]
     conference_paper_pdf?: string
+    doi?: string
   }
 }
 
@@ -166,7 +167,7 @@ export function ConferencePublicationSummary({ publication }: ConferencePublicat
                 <ArrowRight className="h-3.5 w-3.5" />
               </Link>
             </Button>
-            {publication.conference_paper_pdf && (
+            {publication.conference_paper_pdf ? (
               <Button
                 asChild
                 variant="ghost"
@@ -178,7 +179,24 @@ export function ConferencePublicationSummary({ publication }: ConferencePublicat
                   <span className="text-xs">PDF</span>
                 </a>
               </Button>
-            )}
+            ) : publication.doi ? (
+              <Button
+                asChild
+                variant="ghost"
+                size="sm"
+                className="text-muted-foreground hover:text-foreground hover:bg-gray-50 ml-auto"
+              >
+                <a
+                  href={publication.doi.startsWith("http") ? publication.doi : `https://doi.org/${publication.doi}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1.5"
+                >
+                  <ExternalLink className="h-3.5 w-3.5" />
+                  <span className="text-xs">DOI</span>
+                </a>
+              </Button>
+            ) : null}
           </div>
         </div>
       </CardContent>

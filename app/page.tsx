@@ -34,6 +34,7 @@ import Image from "next/image"
 import Link from "next/link"
 import { ConferencePublicationSummary } from "@/components/conference-publication-summary"
 import { LinkPreview } from "@/components/link-preview"
+import { GoogleScholarIcon, OrcidIcon, XIcon } from "@/components/social-icons"
 
 const categoryIcons = {
   Interpersonal: Users,
@@ -119,7 +120,8 @@ export default async function Home() {
   const hasPublications = (publications?.length ?? 0) > 0
   const hasAwards = (awards?.length ?? 0) > 0
   const hasMediaCoverage = (mediaCoverage?.length ?? 0) > 0
-  const hasSkills = (skills?.length ?? 0) > 0
+  const hasCertifications = (certifications?.length ?? 0) > 0
+  const hasSkills = (skills?.length ?? 0) > 0 || hasCertifications
   const hasVolunteering = (volunteering?.length ?? 0) > 0
 
   const hiddenSections: string[] = [
@@ -155,20 +157,24 @@ export default async function Home() {
                 {/* Premium Badge: Key Representative */}
                 <div className="inline-flex items-center gap-2.5 rounded-full border-2 border-primary/50 bg-white/90 px-5 py-2.5 text-sm font-bold text-primary shadow-lg backdrop-blur-md hover:shadow-xl transition-all duration-300">
                   <span className="inline-block h-2.5 w-2.5 rounded-full bg-[#f42a41] animate-pulse shadow-sm" aria-hidden />
-                  <span className="tracking-wide">{profile?.hero_badge_text || "Key Representative · Bangladesh"}</span>
+                  <span className="tracking-wide">{profile?.hero_badge_text || "Portfolio"}</span>
                 </div>
                 
                 <div className="space-y-3">
-                  <p className="text-xs sm:text-sm uppercase tracking-[0.25em] text-primary/80 font-bold">
-                    {profile?.hero_subtitle || "Representing Bangladesh in Global Mental Health & Public Health"}
-                  </p>
+                  {profile?.hero_subtitle && (
+                    <p className="text-xs sm:text-sm uppercase tracking-[0.25em] text-primary/80 font-bold">
+                      {profile.hero_subtitle}
+                    </p>
+                  )}
                   <h1 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-primary leading-[0.95] tracking-tight">
-                    {profile?.full_name || "Lamia Tasnim"}
+                    {profile?.full_name || "Bidhita Islam"}
                   </h1>
                   <div className="w-20 h-1.5 bg-gradient-to-r from-primary via-[#f42a41] to-primary rounded-full mx-auto lg:mx-0" aria-hidden />
-                  <p className="text-lg sm:text-xl md:text-2xl text-foreground/90 font-semibold leading-tight pt-2">
-                    {profile?.title || "Public Health Professional | Researcher | Mental Health Systems Advocate"}
-                  </p>
+                  {profile?.title && (
+                    <p className="text-lg sm:text-xl md:text-2xl text-foreground/90 font-semibold leading-tight pt-2">
+                      {profile.title}
+                    </p>
+                  )}
                 </div>
 
                 <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 justify-center lg:justify-start pt-1">
@@ -187,10 +193,11 @@ export default async function Home() {
                 </div>
 
                 {/* Bio - Concise */}
-                <p className="text-sm sm:text-base text-muted-foreground max-w-2xl mx-auto lg:mx-0 leading-relaxed pt-1">
-                  {profile?.bio ||
-                    "Bridging research, AI in healthcare, and community mental health programs. Over a decade of experience strengthening systems and representing Bangladesh in global health discussions with ethical leadership."}
-                </p>
+                {profile?.bio && (
+                  <p className="text-sm sm:text-base text-muted-foreground max-w-2xl mx-auto lg:mx-0 leading-relaxed pt-1">
+                    {profile.bio}
+                  </p>
+                )}
 
                 <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center lg:justify-start pt-3">
                   <ScrollButton targetId="contact">
@@ -202,7 +209,7 @@ export default async function Home() {
                       Get in Touch
                     </Button>
                   </ScrollButton>
-                  <DownloadCVButton />
+                  <DownloadCVButton hasCv={!!profile?.cv_path} />
                 </div>
               </div>
 
@@ -268,6 +275,7 @@ export default async function Home() {
         </section>
 
         {/* Education Section */}
+        {hasEducation && (
         <section id="education" className="py-20 md:py-24 bg-white scroll-mt-20">
           <div className="container mx-auto px-6 max-w-6xl">
             <div className="text-center mb-14">
@@ -348,8 +356,10 @@ export default async function Home() {
             </div>
           </div>
         </section>
+        )}
 
         {/* Experiences Section with Tabs */}
+        {hasExperiences && (
         <section id="experiences" className="py-20 md:py-24 bg-[#f8fafc] scroll-mt-20">
           <div className="container mx-auto px-6 max-w-6xl">
             <div className="text-center mb-14">
@@ -541,8 +551,10 @@ export default async function Home() {
             </Tabs>
           </div>
         </section>
+        )}
 
         {/* Scholarly Activities Section */}
+        {hasScholarlyActivities && (
         <section id="scholarly-activities" className="py-20 md:py-24 bg-white scroll-mt-20">
           <div className="container mx-auto px-6 max-w-6xl">
             <div className="text-center mb-14">
@@ -594,8 +606,10 @@ export default async function Home() {
             </div>
           </div>
         </section>
+        )}
 
         {/* Publications Section with Tabs */}
+        {hasPublications && (
         <section id="publications" className="py-20 md:py-24 bg-[#f8fafc] scroll-mt-20">
           <div className="container mx-auto px-6 max-w-6xl">
             <div className="text-center mb-14">
@@ -703,19 +717,41 @@ export default async function Home() {
                           </div>
                         )}
 
-                        {pub.academic_pdf && (
-                          <Button
-                            asChild
-                            variant="outline"
-                            size="sm"
-                            className="border-primary text-primary hover:bg-primary hover:text-white"
-                          >
-                            <a href={pub.academic_pdf} target="_blank" rel="noopener noreferrer">
-                              <FileText className="mr-2 h-4 w-4" />
-                              View PDF
-                              <ExternalLink className="ml-2 h-4 w-4" />
-                            </a>
-                          </Button>
+                        {(pub.academic_pdf || pub.doi) && (
+                          <div className="flex flex-wrap gap-3">
+                            {pub.academic_pdf && (
+                              <Button
+                                asChild
+                                variant="outline"
+                                size="sm"
+                                className="border-primary text-primary hover:bg-primary hover:text-white"
+                              >
+                                <a href={pub.academic_pdf} target="_blank" rel="noopener noreferrer">
+                                  <FileText className="mr-2 h-4 w-4" />
+                                  View PDF
+                                  <ExternalLink className="ml-2 h-4 w-4" />
+                                </a>
+                              </Button>
+                            )}
+                            {!pub.academic_pdf && pub.doi && (
+                              <Button
+                                asChild
+                                variant="outline"
+                                size="sm"
+                                className="border-primary text-primary hover:bg-primary hover:text-white"
+                              >
+                                <a
+                                  href={pub.doi.startsWith("http") ? pub.doi : `https://doi.org/${pub.doi}`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                >
+                                  <Quote className="mr-2 h-4 w-4" />
+                                  View via DOI
+                                  <ExternalLink className="ml-2 h-4 w-4" />
+                                </a>
+                              </Button>
+                            )}
+                          </div>
                         )}
                       </CardContent>
                     </Card>
@@ -872,8 +908,10 @@ export default async function Home() {
             </Tabs>
           </div>
         </section>
+        )}
 
         {/* Awards Section */}
+        {hasAwards && (
         <section id="awards" className="py-20 md:py-24 bg-white scroll-mt-20">
           <div className="container mx-auto px-6 max-w-6xl">
             <div className="text-center mb-14">
@@ -926,6 +964,7 @@ export default async function Home() {
             )}
           </div>
         </section>
+        )}
 
         {/* Media Coverage Section - News-style layout */}
         {hasMediaCoverage && (
@@ -1036,6 +1075,7 @@ export default async function Home() {
         )}
 
         {/* Skills Section with Tabs */}
+        {hasSkills && (
         <section id="skills" className="py-20 md:py-24 bg-[#f8fafc] scroll-mt-20">
           <div className="container mx-auto px-6 max-w-6xl">
             <div className="text-center mb-14">
@@ -1244,8 +1284,10 @@ export default async function Home() {
             </div>
           </div>
         </section>
+        )}
 
         {/* Volunteering Section */}
+        {hasVolunteering && (
         <section id="volunteering" className="py-20 md:py-24 bg-white scroll-mt-20">
           <div className="container mx-auto px-6 max-w-6xl">
             <div className="text-center mb-14">
@@ -1300,6 +1342,7 @@ export default async function Home() {
             </div>
           </div>
         </section>
+        )}
 
         {/* Contact Section */}
         <section id="contact" className="py-20 md:py-24 bg-[#f8fafc] scroll-mt-20">
@@ -1327,12 +1370,13 @@ export default async function Home() {
                         </div>
                         <div>
                           <p className="font-semibold text-foreground mb-1">Email</p>
-                          <a
-                            href={`mailto:${profile?.email || "contact@lamia-tasnim.org"}`}
-                            className="text-primary hover:underline"
-                          >
-                            {profile?.email || "contact@lamia-tasnim.org"}
-                          </a>
+                          {profile?.email ? (
+                            <a href={`mailto:${profile.email}`} className="text-primary hover:underline">
+                              {profile.email}
+                            </a>
+                          ) : (
+                            <p className="text-muted-foreground">Not available</p>
+                          )}
                         </div>
                       </div>
 
@@ -1381,6 +1425,42 @@ export default async function Home() {
                           >
                             <a href={profile.facebook_url} target="_blank" rel="noopener noreferrer">
                               <Facebook className="h-5 w-5" />
+                            </a>
+                          </Button>
+                        )}
+                        {profile?.google_scholar_url && (
+                          <Button
+                            asChild
+                            variant="outline"
+                            size="icon"
+                            className="border-2 border-primary hover:bg-primary hover:text-white bg-transparent"
+                          >
+                            <a href={profile.google_scholar_url} target="_blank" rel="noopener noreferrer" aria-label="Google Scholar">
+                              <GoogleScholarIcon className="h-5 w-5" />
+                            </a>
+                          </Button>
+                        )}
+                        {profile?.orcid_url && (
+                          <Button
+                            asChild
+                            variant="outline"
+                            size="icon"
+                            className="border-2 border-primary hover:bg-primary hover:text-white bg-transparent"
+                          >
+                            <a href={profile.orcid_url} target="_blank" rel="noopener noreferrer" aria-label="ORCID">
+                              <OrcidIcon className="h-5 w-5" />
+                            </a>
+                          </Button>
+                        )}
+                        {profile?.x_url && (
+                          <Button
+                            asChild
+                            variant="outline"
+                            size="icon"
+                            className="border-2 border-primary hover:bg-primary hover:text-white bg-transparent"
+                          >
+                            <a href={profile.x_url} target="_blank" rel="noopener noreferrer" aria-label="X (Twitter)">
+                              <XIcon className="h-5 w-5" />
                             </a>
                           </Button>
                         )}

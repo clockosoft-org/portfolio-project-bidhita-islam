@@ -101,18 +101,39 @@ export default async function PublicationsPage() {
                         </div>
                       )}
 
-                      {pub.academic_pdf && (
-                        <Button
-                          asChild
-                          variant="outline"
-                          size="sm"
-                          className="border-primary text-primary bg-transparent"
-                        >
-                          <a href={pub.academic_pdf} target="_blank" rel="noopener noreferrer">
-                            <FileText className="mr-2 h-4 w-4" />
-                            View PDF <ExternalLink className="ml-2 h-4 w-4" />
-                          </a>
-                        </Button>
+                      {(pub.academic_pdf || pub.doi) && (
+                        <div className="flex flex-wrap gap-3">
+                          {pub.academic_pdf && (
+                            <Button
+                              asChild
+                              variant="outline"
+                              size="sm"
+                              className="border-primary text-primary bg-transparent"
+                            >
+                              <a href={pub.academic_pdf} target="_blank" rel="noopener noreferrer">
+                                <FileText className="mr-2 h-4 w-4" />
+                                View PDF <ExternalLink className="ml-2 h-4 w-4" />
+                              </a>
+                            </Button>
+                          )}
+                          {!pub.academic_pdf && pub.doi && (
+                            <Button
+                              asChild
+                              variant="outline"
+                              size="sm"
+                              className="border-primary text-primary bg-transparent"
+                            >
+                              <a
+                                href={pub.doi.startsWith("http") ? pub.doi : `https://doi.org/${pub.doi}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                              >
+                                <Quote className="mr-2 h-4 w-4" />
+                                View via DOI <ExternalLink className="ml-2 h-4 w-4" />
+                              </a>
+                            </Button>
+                          )}
+                        </div>
                       )}
                     </CardContent>
                   </Card>

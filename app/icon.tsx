@@ -10,7 +10,15 @@ export const contentType = "image/png"
 
 export default async function Icon() {
   const supabase = await createClient()
-  const { data: profile } = await supabase.from("profiles").select("profile_image").single()
+  const { data: profile } = await supabase.from("profiles").select("profile_image, full_name").single()
+
+  // Derive initials from the owner's name so the favicon matches the actual user.
+  const initials = (profile?.full_name || "Bidhita Islam")
+    .trim()
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((part: string) => part.charAt(0).toUpperCase())
+    .join("")
 
   // If profile image exists, try to fetch it and use it
   // Otherwise, fall back to default icon
@@ -65,7 +73,7 @@ export default async function Icon() {
           borderRadius: "50%",
         }}
       >
-        <span style={{ color: "white", fontSize: "20px", fontWeight: "bold" }}>MA</span>
+        <span style={{ color: "white", fontSize: "20px", fontWeight: "bold" }}>{initials}</span>
       </div>
     ),
     {
